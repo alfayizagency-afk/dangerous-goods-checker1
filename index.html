@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام التحقق من مواد التسليم المباشر (Direct Delivery)</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Cairo Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between p-4 md:p-8">
+
+    <!-- Header -->
+    <header class="max-w-4xl w-full mx-auto mb-6 text-center">
+        <div class="inline-flex items-center gap-3 bg-white px-6 py-3 rounded-2xl shadow-sm border border-slate-200">
+            <i class="fa-solid fa-ship text-3xl text-blue-600"></i>
+            <div class="text-right">
+                <h1 class="text-xl font-bold text-slate-800">نظام فحص البضائع الخطرة (IMDG)</h1>
+                <p class="text-xs text-slate-500">نظام التحقق الآلي من مواد التسليم المباشر بالموانئ</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 flex-grow">
+        
+        <!-- Input Form Section -->
+        <div class="lg:col-span-7 glass-card rounded-3xl p-6 shadow-xl border border-white">
+            <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2 border-b pb-3">
+                <i class="fa-solid fa-clipboard-check text-blue-500"></i>
+                إدخال بيانات المادة البحرية
+            </h2>
+
+            <form id="checkForm" onsubmit="event.preventDefault(); checkSubstance();" class="space-y-5">
+                <!-- Class Selection -->
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">
+                        رقم التصنيف (IMDG Class) <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <select id="imdgClass" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-800 focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition appearance-none">
+                            <option value="">اختر الفئة (Class)...</option>
+                            <option value="1">1 - متفجرات (Explosives)</option>
+                            <option value="2.1">2.1 - غازات قابلة للاشتعال (Flammable Gases)</option>
+                            <option value="2.3">2.3 - غازات سامة (Toxic Gases)</option>
+                            <option value="2.3/8">2.3/8 - غازات سامة وآكلة (Toxic & Corrosive)</option>
+                            <option value="4.2">4.2 - مواد عرضة للاحتراق الذاتي</option>
+                            <option value="4.3">4.3 - مواد تطلق غازات اشتعال مع الماء</option>
+                            <option value="4.3/4.2">4.3/4.2 - مركبات معدنية عضوية</option>
+                            <option value="5.1">5.1 - مواد مؤكسدة (Oxidizing Substances)</option>
+                            <option value="5.2">5.2 - بيروكسيدات عضوية (Organic Peroxides)</option>
+                            <option value="6.1">6.1 - مواد سامة (Toxic Substances)</option>
+                            <option value="7">7 - مواد مشعة (Radioactive Materials)</option>
+                            <option value="8">8 - مواد آكلة/أحماض (Corrosive Substances)</option>
+                            <option value="other">فئة أخرى غير مدرجة</option>
+                        </select>
+                        <i class="fa-solid fa-chevron-down absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                    </div>
+                </div>
+
+                <!-- UN Number -->
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">
+                        رقم المنظمة البحرية (UN No.) <span class="text-red-500">*</span>
+                    </label>
+                    <input type="number" id="unNo" required placeholder="مثال: 1830 أو 2031" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-800 focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition">
+                    <p class="text-xs text-slate-400 mt-1">يتكون الرقم عادة من 4 أرقام حسب معايير UN</p>
+                </div>
+
+                <!-- Substance Name (Optional) -->
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">
+                        اسم المادة العلمي (اختياري)
+                    </label>
+                    <input type="text" id="substanceName" placeholder="مثال: Sulphuric Acid أو Nitric Acid" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-800 focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition">
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 active:scale-[0.99] text-white font-bold py-3.5 px-6 rounded-xl shadow-lg shadow-blue-500/30 transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    فحص وإصدار النتيجة
+                </button>
+            </form>
+        </div>
+
+        <!-- Result Panel -->
+        <div class="lg:col-span-5 flex flex-col justify-between">
+            <div id="resultContainer" class="glass-card rounded-3xl p-6 shadow-xl border border-white h-full flex flex-col justify-center items-center text-center transition-all duration-300">
+                <!-- Initial Placeholder State -->
+                <div id="initialState" class="space-y-3 py-8">
+                    <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto text-2xl">
+                        <i class="fa-solid fa-vial-circle-check"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-700">في انتظار الفحص...</h3>
+                    <p class="text-xs text-slate-500 max-w-xs">يرجى تعبئة بيانات الكلاس ورقم UN للتحقق مما إذا كانت المادة تتطلب تفريغ وتسليم مباشر.</p>
+                </div>
+
+                <!-- Dynamic Result Card (Hidden by default) -->
+                <div id="resultCard" class="hidden w-full text-right space-y-4">
+                    <div id="badgeStatus" class="inline-flex items-center gap-2 px-4 py-2 rounded-full font-bold text-sm">
+                        <!-- Dynamic Badge -->
+                    </div>
+
+                    <div id="alertBox" class="p-4 rounded-2xl border space-y-2">
+                        <!-- Dynamic Alert Message -->
+                    </div>
+
+                    <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200 text-xs space-y-2">
+                        <div class="flex justify-between border-b pb-2">
+                            <span class="text-slate-500">التصنيف (Class):</span>
+                            <span id="resClass" class="font-bold text-slate-800"></span>
+                        </div>
+                        <div class="flex justify-between border-b pb-2">
+                            <span class="text-slate-500">رقم الأمم المتحدة (UN No):</span>
+                            <span id="resUn" class="font-bold text-slate-800"></span>
+                        </div>
+                        <div class="flex justify-between border-b pb-2">
+                            <span class="text-slate-500">اسم المادة المكتشف:</span>
+                            <span id="resSubstance" class="font-bold text-slate-800"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-500">الإجراء المطلوب:</span>
+                            <span id="resAction" class="font-bold text-slate-800"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Reference List Quick Table -->
+    <section class="max-w-4xl w-full mx-auto mt-6 glass-card rounded-3xl p-6 shadow-sm border border-white">
+        <details class="group">
+            <summary class="flex justify-between items-center font-bold text-slate-700 cursor-pointer list-none">
+                <span class="flex items-center gap-2">
+                    <i class="fa-solid fa-list-ol text-blue-600"></i>
+                    عرض قائمة المواد المعتمدة في لائحة التسليم المباشر (18 مادة)
+                </span>
+                <span class="transition group-open:rotate-180">
+                    <i class="fa-solid fa-chevron-down text-slate-400"></i>
+                </span>
+            </summary>
+            <div class="mt-4 overflow-x-auto">
+                <table class="w-full text-xs text-right border-collapse">
+                    <thead>
+                        <tr class="bg-slate-100 text-slate-600 border-b">
+                            <th class="p-2">#</th>
+                            <th class="p-2">اسم المادة العلمية</th>
+                            <th class="p-2">IMDG Class</th>
+                            <th class="p-2">أرقام UN</th>
+                        </tr>
+                    </thead>
+                    <tbody id="referenceTableBody" class="divide-y divide-slate-100 text-slate-700">
+                        <!-- JavaScript will populate reference list -->
+                    </tbody>
+                </table>
+            </div>
+        </details>
+    </section>
+
+    <!-- Footer -->
+    <footer class="max-w-4xl w-full mx-auto mt-6 text-center text-xs text-slate-500">
+        نظام التحقق الآلي للبضائع الخطرة &copy; Direct Delivery Checker
+    </footer>
+
+    <!-- Logic JavaScript -->
+    <script>
+        // Restricted Direct Delivery Database derived from document
+        const directDeliveryList = [
+            { id: 1, name: "EXPLOSIVES", nameAr: "متفجرات", class: "1", un: ["ALL"] },
+            { id: 2, name: "RADIOACTIVE MATERIALS", nameAr: "مواد مشعة", class: "7", un: ["ALL"] },
+            { id: 3, name: "AMMONIUM", nameAr: "أمونيوم", class: "5.1", un: [1942, 2067, 2426] },
+            { id: 4, name: "NITRIC ACID", nameAr: "حمض النيتريك", class: "8", un: [2031] },
+            { id: 5, name: "SULPHONIC ACID", nameAr: "حمض السلفونيك", class: "8", un: [2583, 2585, 2586] },
+            { id: 6, name: "SULPHURIC ACID", nameAr: "حمض الكبريتيك", class: "8", un: [1830, 1831, 1832] },
+            { id: 7, name: "SODIUM HYDROXIDE", nameAr: "هيدروكسيد الصوديوم", class: "8", un: [1823, 1824] },
+            { id: 8, name: "HYDROGEN PEROXIDE", nameAr: "بيروكسيد الهيدروجين", class: "5.1", un: [2014, 2015] },
+            { id: 9, name: "GAS LIGHTER", nameAr: "ولاعات غاز", class: "2.1", un: [1057] },
+            { id: 10, name: "ETHYL METHYL KETONE PEROXIDE", nameAr: "إيثيل ميثيل كيتون بيروكسيد", class: "5.2", un: [1193] },
+            { id: 11, name: "AMMONIA ANHYDROUS", nameAr: "الأمونيا الخالية من الماء", class: "2.3/8", un: [1005] },
+            { id: 12, name: "CALCIUM HYPOCHLORITE", nameAr: "هيبوكلوريت الكالسيوم", class: "5.1", un: [2208, 3485, 3486] },
+            { id: 13, name: "FORMIC ACID", nameAr: "حمض الفورميك", class: "8", un: [1779, 3412] },
+            { id: 14, name: "HYDRO CHLORIC ACID", nameAr: "حمض الهيدروكلوريك", class: "8", un: [1789] },
+            { id: 15, name: "PHOSPHORIC ACID", nameAr: "حمض الفوسفوريك", class: "8", un: [1805, 3453] },
+            { id: 16, name: "TETRA ETHYL LEAD", nameAr: "تترا إيثيل الرصاص", class: "6.1", un: [1649] },
+            { id: 17, name: "HYDROGEN SULPHIDE", nameAr: "كبريتيد الهيدروجين", class: "2.3", un: [1053] },
+            { id: 18, name: "ORGANIC METALLIC COMPOUNDS", nameAr: "مركبات معدنية عضوية", class: "4.3/4.2", un: [3399, 3396, 3282, 1467] }
+        ];
+
+        // Populate Reference Table
+        window.onload = function() {
+            const tableBody = document.getElementById('referenceTableBody');
+            directDeliveryList.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="p-2 font-bold">${item.id}</td>
+                    <td class="p-2 font-semibold">${item.name} <span class="text-slate-400">(${item.nameAr})</span></td>
+                    <td class="p-2"><span class="bg-slate-200 px-2 py-0.5 rounded text-slate-800 font-mono">${item.class}</span></td>
+                    <td class="p-2 font-mono text-blue-600">${item.un.join(', ')}</td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        };
+
+        function checkSubstance() {
+            const imdgClass = document.getElementById('imdgClass').value;
+            const unNo = parseInt(document.getElementById('unNo').value, 10);
+            const userSubstanceName = document.getElementById('substanceName').value.trim();
+
+            const initialState = document.getElementById('initialState');
+            const resultCard = document.getElementById('resultCard');
+            const badgeStatus = document.getElementById('badgeStatus');
+            const alertBox = document.getElementById('alertBox');
+
+            // Hide initial placeholder
+            initialState.classList.add('hidden');
+            resultCard.classList.remove('hidden');
+
+            // Verification Check
+            const matchedItem = directDeliveryList.find(item => {
+                // Class matching logic
+                const isClassMatch = (item.class === imdgClass);
+                
+                // UN matching logic (Check for "ALL" or specific UN number inclusion)
+                const isUnMatch = item.un.includes("ALL") || item.un.includes(unNo);
+
+                return isClassMatch && isUnMatch;
+            });
+
+            // Populate Output Data
+            document.getElementById('resClass').textContent = imdgClass;
+            document.getElementById('resUn').textContent = unNo;
+            document.getElementById('resSubstance').textContent = userSubstanceName || (matchedItem ? matchedItem.name : "غير محدد");
+
+            if (matchedItem) {
+                // RESTRICTED / REJECTED STATUS (Red)
+                badgeStatus.className = "inline-flex items-center gap-2 px-4 py-2 rounded-full font-bold text-sm bg-red-100 text-red-700 border border-red-300";
+                badgeStatus.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> تسليم مباشر إجباري (مادة خطرة)`;
+
+                alertBox.className = "p-4 rounded-2xl border border-red-200 bg-red-50 text-red-800 space-y-1 text-right";
+                alertBox.innerHTML = `
+                    <h4 class="font-bold text-base flex items-center gap-2 text-red-600">
+                        <i class="fa-solid fa-circle-xmark"></i> مادة خطرة مدرجة لائحياً
+                    </h4>
+                    <p class="text-xs">المادة المدخلة <strong>(${matchedItem.name})</strong> تقع ضمن لائحة المواد الخطرة التي تتطلب تفريغاً وتسليماً مباشراً من السفينة إلى شاحنة النقل بدون تخزين.</p>
+                `;
+
+                document.getElementById('resAction').textContent = "تسليم مباشر فوراً من الرصيف";
+                document.getElementById('resAction').className = "font-bold text-red-600";
+            } else {
+                // APPROVED / NORMAL STATUS (Green)
+                badgeStatus.className = "inline-flex items-center gap-2 px-4 py-2 rounded-full font-bold text-sm bg-emerald-100 text-emerald-700 border border-emerald-300";
+                badgeStatus.innerHTML = `<i class="fa-solid fa-circle-check"></i> بضاعة آمنة / غير مدرجة بالقائمة`;
+
+                alertBox.className = "p-4 rounded-2xl border border-emerald-200 bg-emerald-50 text-emerald-800 space-y-1 text-right";
+                alertBox.innerHTML = `
+                    <h4 class="font-bold text-base flex items-center gap-2 text-emerald-600">
+                        <i class="fa-solid fa-circle-check"></i> لا تتطلب تسليم مباشر خاص
+                    </h4>
+                    <p class="text-xs">المادة المدخلة بناءً على الكلاس والرقم غير مدرجة في جدول المواد الخاضعة لإجراءات التسليم المباشر الإجباري.</p>
+                `;
+
+                document.getElementById('resAction').textContent = "تخزين وإجراءات اعتيادية";
+                document.getElementById('resAction').className = "font-bold text-emerald-600";
+            }
+        }
+    </script>
+</body>
+</html>
